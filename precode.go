@@ -81,7 +81,7 @@ func postTask(w http.ResponseWriter, r *http.Request) {
 	_, ok := tasks[task.ID]
 	if ok {
 		w.Header().Set("Content-Type", "application/json")
-		http.Error(w, `{ "error": "task with such ID already exist" }`, http.StatusUnprocessableEntity)
+		http.Error(w, `{ "error": "task with such ID already exist" }`, http.StatusBadRequest)
 		return
 	}
 	tasks[task.ID] = task
