@@ -57,7 +57,10 @@ func getTasks(w http.ResponseWriter, r *http.Request) {
 	// так как все успешно, то статус OK
 	w.WriteHeader(http.StatusOK)
 	// записываем сериализованные в JSON данные в тело ответа
-	w.Write(resp)
+	_, err = w.Write(resp)
+	if err != nil {
+		fmt.Printf("Error w.Write(): '%v'\n", err.Error())
+	}
 }
 
 func postTask(w http.ResponseWriter, r *http.Request) {
@@ -75,6 +78,12 @@ func postTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, ok := tasks[task.ID]
+	if ok {
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, `{ "error": "task with such ID already exist" }`, http.StatusUnprocessableEntity)
+		return
+	}
 	tasks[task.ID] = task
 
 	w.Header().Set("Content-Type", "application/json")
@@ -92,13 +101,16 @@ func getTask(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := json.Marshal(task)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, err = w.Write(resp)
+	if err != nil {
+		fmt.Printf("Error w.Write(): '%v'\n", err.Error())
+	}
 }
 
 func deleteTask(w http.ResponseWriter, r *http.Request) {
